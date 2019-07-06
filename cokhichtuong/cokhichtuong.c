@@ -33,7 +33,7 @@ void di_phao(quan_co *co);
 void di_tuong(quan_co *co);
 void di_default(quan_co *co);
 /* init function for quan_co */
-void init_quan_co(quan_co **co, loai_quan_co loai, char *dan_do, mau_quan_co mau);
+void init_quan_co(quan_co *co, loai_quan_co loai, char *dan_do, mau_quan_co mau);
 
 struct key_value {
     char *key;
@@ -54,7 +54,7 @@ struct key_value {
 typedef struct player {
     int nuoc;
     int quan_luc;
-    quan_co *c[16];
+    quan_co c[16];
     void (*di)(struct player *);
     void (*trash_talk)(struct player *);
     void (*them_quan)(struct player *, loai_quan_co, char *, mau_quan_co);
@@ -95,7 +95,7 @@ void main() {
                 quan = read_quan();
                 dan_do = read_dan_do();
                 human->them_quan(human, quan, dan_do, ddo);
-                printf("- Đã điều động thêm %s.\n", human->c[human->quan_luc-1]->string);
+                printf("- Đã điều động thêm %s.\n", human->c[human->quan_luc-1].string);
                 break;
             case 2:
                 human->di(human);
@@ -133,31 +133,30 @@ void di_default(quan_co *co) {
     printf("%s đi ???\n", co->string);
 }
 
-void init_quan_co(quan_co **co, loai_quan_co loai, char *dan_do, mau_quan_co mau) {
+void init_quan_co(quan_co *co, loai_quan_co loai, char *dan_do, mau_quan_co mau) {
     int i;
 
-    *co = (quan_co *)malloc(sizeof(quan_co));
-    strncpy((*co)->khac_cot_ghi_tam, dan_do, 32);
-    (*co)->loai = loai;
-    (*co)->mau = mau;
+    strncpy(co->khac_cot_ghi_tam, dan_do, 32);
+    co->loai = loai;
+    co->mau = mau;
 
     for (i=0; i<7; i++) {
         if (loai == mapping[i].value) {
             if (mau == ddo) 
-                strcpy((*co)->string, mapping[i].s_do);
+                strcpy(co->string, mapping[i].s_do);
             else if (mau == dden)
-                strcpy((*co)->string, mapping[i].s_den);
+                strcpy(co->string, mapping[i].s_den);
             else
-                strcpy((*co)->string, "???");
+                strcpy(co->string, "???");
 
-            (*co)->di = mapping[i].func;
+            co->di = mapping[i].func;
             break;
         }
     }
 
     if (i==7) {
-        strcpy((*co)->string, "???");
-        (*co)->di = di_default;
+        strcpy(co->string, "???");
+        co->di = di_default;
     }
 
 }
@@ -233,17 +232,17 @@ void ai(player *p) {
     printf("- AI: ");
     switch (p->nuoc) {
         case 1:
-            p->c[10]->di(p->c[10]);
+            p->c[10].di(&(p->c[10]));
             break;
         case 2:
-            p->c[0]->di(p->c[0]);
+            p->c[0].di(&(p->c[0]));
             break;
         case 3:
-            p->c[2]->di(p->c[2]);
+            p->c[2].di(&(p->c[2]));
             break;
         default:
             r = rand() % 16;
-            p->c[r]->di(p->c[r]);
+            p->c[r].di(&(p->c[r]));
             break;
     }
 }
